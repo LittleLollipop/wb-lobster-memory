@@ -12,17 +12,21 @@ agent_created: true
 - 现有云端 profile / 工作区 markdown：偏"事实笔记"。
 - 本层：偏"关系网络 + 情绪 valence + 重要性排序 + 自动遗忘"。
 
-## 关键路径（不要改）
+## 关键路径（可经环境变量覆盖）
 
-- venv python：`/Users/sai/.workbuddy/venvs/lobster-memory/bin/python`（已编译好 axolotl_rs）
-- 库源码（engine）：`/Users/sai/.workbuddy/skills/lobster-memory/engine`
-- runner：`~/.workbuddy/skills/wb-lobster-memory/runner.py`
-- 图文件（中心、跨项目）：`~/.workbuddy/lobster-memory/memory.axeb`
+以下路径默认值指向作者本机，他人使用前通过环境变量覆盖即可，无需改代码。
 
-调用统一用：
+| 环境变量 | 含义 | 默认值（作者本机） |
+|---|---|---|
+| `LOBSTER_MEMORY_ENGINE` | lobster-memory 的 `engine/` 目录 | `/Users/sai/.workbuddy/skills/lobster-memory` |
+| `LOBSTER_MEMORY_DIR` | 图文件存储目录（图文件固定名 `memory.axeb`） | `~/.workbuddy/lobster-memory` |
+| `LOBSTER_MEMORY_CONSOLIDATE_EVERY` | 巩固周期（轮） | `20` |
+| （调用方 python） | 必须是有 `axolotl_rs` 的 lobster-memory venv 的 python | `/Users/sai/.workbuddy/venvs/lobster-memory/bin/python` |
+
+调用统一用（把 python 换成你自己的 lobster-memory venv）：
 ```
-PY=/Users/sai/.workbuddy/venvs/lobster-memory/bin/python
-RUN=~/.workbuddy/skills/wb-lobster-memory/runner.py
+PY="$LOBSTER_MEMORY_PYTHON"   # 或你的 venv python 绝对路径
+RUN=~/path/to/wb-lobster-memory/runner.py
 $PY $RUN <subcommand>
 ```
 

@@ -4,23 +4,36 @@
 把 lobster-memory 的 MemorySession 包成命令行，供 WorkBuddy 在对话中调用。
 注意：抽取 JSON 由 WorkBuddy（兼任 LLM）自己生成，本脚本只负责落盘/回忆/巩固。
 
-依赖 venv: /Users/sai/.workbuddy/venvs/lobster-memory/bin/python
+依赖：自带 axolotl_rs 的 lobster-memory venv 的 python（路径经 LOBSTER_MEMORY_ENGINE 等环境变量配置）
 """
 import sys
 import os
 import json
 import argparse
 
-SKILL_ENGINE = "/Users/sai/.workbuddy/skills/lobster-memory"
-MEMORY_DIR = os.path.expanduser("~/.workbuddy/lobster-memory")
+# 所有路径均可经环境变量覆盖；默认值指向作者本机布局。
+# 他人使用前设置对应环境变量即可，无需改代码。
+SKILL_ENGINE = os.environ.get(
+    "LOBSTER_MEMORY_ENGINE", "/Users/sai/.workbuddy/skills/lobster-memory"
+)
+MEMORY_DIR = os.environ.get(
+    "LOBSTER_MEMORY_DIR", os.path.expanduser("~/.workbuddy/lobster-memory")
+)
 MEMORY_PATH = os.path.join(MEMORY_DIR, "memory.axeb")
-CONSOLIDATE_EVERY = 20
+CONSOLIDATE_EVERY = int(os.environ.get("LOBSTER_MEMORY_CONSOLIDATE_EVERY", "20"))
 
 sys.path.insert(0, SKILL_ENGINE)
 
-from engine.integration import MemorySession  # noqa: E402
-
-PY = "/Users/sai/.workbuddy/venvs/lobster-memory/bin/python"
+try:
+    from engine.integration import MemorySession  # noqa: E402
+except ImportError as e:
+    sys.stderr.write(
+        "[wb-lobster-memory] 无法导入 lobster-memory 的 engine。\n"
+        "  请确认 LOBSTER_MEMORY_ENGINE 指向含 engine/ 的目录，\n"
+        "  且当前 python 所在 venv 已安装 axolotl_rs。\n"
+        f"原始错误: {e}\n"
+    )
+    sys.exit(2)
 
 
 def _session():

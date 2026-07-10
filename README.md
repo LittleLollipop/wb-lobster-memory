@@ -12,13 +12,21 @@ WorkBuddy 接入 [lobster-memory](https://github.com/LittleLollipop/lobster-memo
 ## 前提
 
 - 已安装并编译好的 [lobster-memory](https://github.com/LittleLollipop/lobster-memory)（底层 `axolotl_rs`）。
-- `SKILL.md` 与 `runner.py` 中的路径**硬编码为作者本机**（`/Users/sai/.workbuddy/...`）。他人使用前需按自己的环境调整路径，或改为从环境变量读取。
+- `SKILL.md` 与 `runner.py` 中的路径**默认指向作者本机**（`/Users/sai/.workbuddy/...`），但均可经环境变量覆盖，他人无需改代码：
+  - `LOBSTER_MEMORY_ENGINE`：lobster-memory 的 `engine/` 目录
+  - `LOBSTER_MEMORY_DIR`：图文件存储目录（图文件名为 `memory.axeb`）
+  - `LOBSTER_MEMORY_CONSOLIDATE_EVERY`：巩固周期（轮，默认 20）
+  - 调用 `runner.py` 的 python 必须是有 `axolotl_rs` 的 lobster-memory venv 的 python
 
 ## 用法
 
 加载技能后见 `SKILL.md` 中的"WorkBuddy 使用惯例"。核心流程：
 
 ```
+# 可选：覆盖默认路径（他人使用前按需设置）
+export LOBSTER_MEMORY_ENGINE=/your/path/lobster-memory
+export LOBSTER_MEMORY_DIR=~/.lobster-memory
+
 PY=/path/to/venvs/lobster-memory/bin/python
 RUN=wb-lobster-memory/runner.py
 $PY $RUN status                 # 会话起步：感知当前记忆规模
