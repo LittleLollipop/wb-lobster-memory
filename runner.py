@@ -43,8 +43,13 @@ def _session():
 
 def cmd_status(_):
     s = _session()
-    print(s.start())
-    s.close()
+    try:
+        out = s.start()
+        s.close()  # 先落盘/解锁，失败则抛错，不打印假成功
+    except Exception as e:
+        sys.stderr.write(f"[wb-lobster-memory] status 失败: {e}\n")
+        sys.exit(1)
+    print(out)
 
 
 def cmd_remember(args):
@@ -54,48 +59,54 @@ def cmd_remember(args):
         print(json.dumps({"nodes_added": 0, "edges_added": 0, "error": "empty input"}, ensure_ascii=False))
         return
     s = _session()
-    res = s.after_turn(raw)
+    try:
+        res = s.after_turn(raw)
+        s.close()  # 先落盘，确保真正写入后再输出；失败则抛错、不打印假成功
+    except Exception as e:
+        sys.stderr.write(f"[wb-lobster-memory] 写入记忆失败（未落盘）: {e}\n")
+        sys.exit(1)
     print(json.dumps(res, ensure_ascii=False))
-    s.close()
 
 
 def cmd_recall(args):
     s = _session()
     kws = args.keywords if args.keywords else None
     rows = s.recall(keywords=kws, domain=args.domain, limit=args.limit)
+    s.close()
     if args.raw:
         print(json.dumps(rows, ensure_ascii=False, default=str))
     else:
         for m in rows:
             print(f"- {m.get('label')} | {m.get('content')} | domain={m.get('domain')} type={m.get('type')}")
-    s.close()
 
 
 def cmd_feedback(args):
     s = _session()
     rows = s.recall_feedback(valence=args.valence, limit=args.limit)
+    s.close()
     if args.raw:
         print(json.dumps(rows, ensure_ascii=False, default=str))
     else:
         for m in rows:
             print(f"- {m.get('label')} | {m.get('content')} | valence={m.get('valence')}")
-    s.close()
 
 
 def cmd_should(args):
     s = _session()
-    print(s.should_consolidate(args.round))
+    r = s.should_consolidate(args.round)
     s.close()
+    print(r)
 
 
 def cmd_consolidate(args):
     s = _session()
     if s.should_consolidate(args.round):
         s.consolidate()
-        print(s.consolidate_summary())
+        summary = s.consolidate_summary()
     else:
-        print("巩固未到期（容量未超且未到周期）")
+        summary = "巩固未到期（容量未超且未到周期）"
     s.close()
+    print(summary)
 
 
 def main():
