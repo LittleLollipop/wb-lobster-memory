@@ -1,13 +1,49 @@
 ---
 name: wb-lobster-memory
 description: WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。作为现有云端/工作区 markdown 记忆之外的并行补充层，用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成。当用户说"记住这个""用图记忆""回忆一下 X""巩固记忆"，或对话出现值得长期保留的偏好/关系/反馈时触发。
+version: 0.1.0
+author: Sai
 agent_created: true
+triggers:
+  - "记住这个"
+  - "用图记忆"
+  - "图记忆"
+  - "回忆一下"
+  - "巩固记忆"
+  - "长期记忆"
+allowed-tools:
+  - Bash
+requires:
+  python: ">=3.10"
+  env:
+    - LOBSTER_MEMORY_ENGINE
+    - LOBSTER_MEMORY_PYTHON
 ---
 
 # wb-lobster-memory — WorkBuddy 的图记忆桥接层
 
 把已安装的 `lobster-memory` 库（底层 `axolotl_rs` 图存储）接入 WorkBuddy 的对话流程，
 作为**现有记忆之外的第三层**：知识图谱形式的长期记忆。
+
+## 依赖（前置安装）
+
+本技能**不是独立可运行**的，它只是 `lobster-memory` 引擎的 WorkBuddy 桥接层。使用前必须先安装同作者的 `lobster-memory`：
+
+1. 安装 `lobster-memory` 引擎（含 `axolotl_rs` 图存储）：
+   ```bash
+   git clone https://github.com/LittleLollipop/lobster-memory.git
+   cd lobster-memory && bash install.sh
+   ```
+   安装后记住两样东西：引擎目录（含 `engine/`）和它的 venv python 路径
+   （默认 `~/.workbuddy/venvs/lobster-memory/bin/python`）。
+
+2. 在本技能调用 `runner.py` 时，通过环境变量指向引擎：
+   ```bash
+   export LOBSTER_MEMORY_ENGINE=/path/to/lobster-memory        # 含 engine/ 的目录
+   export LOBSTER_MEMORY_PYTHON=/path/to/lobster-memory/venv/bin/python   # 已装 axolotl_rs 的 python
+   ```
+
+> 未安装 `lobster-memory` 时，`runner.py` 会直接退出并返回明确报错，不会静默失败。
 
 - 现有云端 profile / 工作区 markdown：偏"事实笔记"。
 - 本层：偏"关系网络 + 情绪 valence + 重要性排序 + 自动遗忘"。
