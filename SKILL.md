@@ -15,6 +15,7 @@ allowed-tools:
   - Bash
 requires:
   python: ">=3.10"
+  platform: "darwin-arm64"   # 仅支持 Apple Silicon (M 系列)；依赖的 lobster-memory 引擎仅提供 aarch64-apple-darwin wheel
   env:
     - LOBSTER_MEMORY_ENGINE
     - LOBSTER_MEMORY_PYTHON
