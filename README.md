@@ -37,6 +37,10 @@ $PY $RUN consolidate --round N  # 约每 20 轮或容量告警时巩固
 
 ## 更新日志
 
+### v0.2.2 (2026-07-23)
+- 重新发布 v0.2.2：依赖 lobster-memory >=0.2.2，对齐 SkillHub 占用冲突后的新版本
+- 无功能改动；版本号在 SKILL.md / `_skillhub_meta.json` 同步
+
 ### v0.2.1 (2026-07-23)
 - 版本对齐 lobster-memory v0.2.1（无功能改动，仅 SKILL.md 版本号）
 
