@@ -100,6 +100,33 @@ def cmd_should(args):
 
 def cmd_consolidate(args):
     s = _session()
+    if args.dry_run:
+        report = s.consolidate(dry_run=True)
+        s.close()
+        # Render the plan as a readable table
+        lines = ["[巩固预览 dry-run · 不改图]"]
+        lines.append(f"  当前: 节点 {report['before']['vertices']} | 边 {report['before']['edges']}")
+        lines.append(f"  类型化保护(不删): {report['protected']}")
+        lines.append(f"  合并簇: {report['merged']['communities_found']} 个 → 将合并 {report['merged']['merged']} 个节点")
+        lines.append(f"  将被软删除: {report['trashed']}")
+        lines.append("")
+        if report.get("merge_groups"):
+            lines.append("合并计划(合并到 canonical):")
+            for g in report["merge_groups"]:
+                can = g["canonical"]
+                mem = ", ".join(g["members"]) if g["members"] else "(无)"
+                lines.append(f"  - {can}  ←  {mem}")
+        if report.get("abstraction_clusters"):
+            lines.append("")
+            lines.append(f"归纳候选簇(被动抽象层, 仅提示不自动合并): {report['abstraction_candidates']} 个")
+            for c in report["abstraction_clusters"]:
+                lines.append(f"  - {' / '.join(c[:8])}{' …' if len(c) > 8 else ''}")
+        if report.get("dry_trash_ids"):
+            lines.append("")
+            lines.append("将被软删除的节点:")
+            lines.append("  - " + ", ".join(report["dry_trash_ids"]))
+        print("\n".join(lines))
+        return
     if s.should_consolidate(args.round):
         s.consolidate()
         summary = s.consolidate_summary()
@@ -134,6 +161,7 @@ def main():
 
     pcon = sub.add_parser("consolidate", help="执行巩固流水线")
     pcon.add_argument("--round", type=int, default=0)
+    pcon.add_argument("--dry-run", action="store_true", help="仅预览合并/删除计划, 不改图")
 
     args = p.parse_args()
     {
