@@ -34,3 +34,17 @@ $PY $RUN remember --json '<抽取JSON>'   # 每轮有实质内容后落盘（WB 
 $PY $RUN recall <关键词>        # 按需回忆
 $PY $RUN consolidate --round N  # 约每 20 轮或容量告警时巩固
 ```
+
+## 更新日志
+
+### v0.2.1 (2026-07-23)
+- 版本对齐 lobster-memory v0.2.1（无功能改动，仅 SKILL.md 版本号）
+
+### v0.2.0 (2026-07-23)
+- 新增 `consolidate --dry-run`：先预览合并/遗忘计划表，再决定是否实跑，避免误删
+- 渲染合并与遗忘计划，列出每个候选节点的类型、分数、休眠天数与处置原因
+
+### v0.1.0 (2026-07-10)
+- 初始版本：WorkBuddy 桥接层（status / remember / recall / feedback / should / consolidate）
+- 抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成
+- 声明仅支持 Apple Silicon（M 系列）
