@@ -1,7 +1,7 @@
 ---
 name: wb-lobster-memory
-description: WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。作为现有云端/工作区 markdown 记忆之外的并行补充层，用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成。当用户说"记住这个""用图记忆""回忆一下 X""巩固记忆"，或对话出现值得长期保留的偏好/关系/反馈时触发。
-version: 0.2.2
+description: WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。2026-09-11 起 markdown 记忆层已清空为指针、身份文件已删除，**图库是长期记忆的唯一真源**，本技能是 WorkBuddy 侧接入它的唯一入口，用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成。当用户说"记住这个""用图记忆""回忆一下 X""巩固记忆"，或对话出现值得长期保留的偏好/关系/反馈时触发。
+version: 0.2.3
 author: Sai
 agent_created: true
 triggers:
@@ -24,7 +24,11 @@ requires:
 # wb-lobster-memory — WorkBuddy 的图记忆桥接层
 
 把已安装的 `lobster-memory` 库（底层 `axolotl_rs` 图存储）接入 WorkBuddy 的对话流程，
-作为**现有记忆之外的第三层**：知识图谱形式的长期记忆。
+作为**长期记忆的唯一真源**：知识图谱形式的长期记忆。
+
+> 2026-09-11 之前本层是「第三层」——与云端 profile / 工作区 markdown **并行**。
+> 用户当日裁定后，markdown 记忆层已**全部清空为指针**（含身份文件删除），
+> 于是本层从「之一」变成「唯一」。详见文末「与 markdown 记忆的关系」。
 
 ## 依赖（前置安装）
 
@@ -46,8 +50,10 @@ requires:
 
 > 未安装 `lobster-memory` 时，`runner.py` 会直接退出并返回明确报错，不会静默失败。
 
-- 现有云端 profile / 工作区 markdown：偏"事实笔记"。
-- 本层：偏"关系网络 + 情绪 valence + 重要性排序 + 自动遗忘"。
+本层承载的是**关系网络 + 情绪 valence + 重要性排序 + 自动遗忘**，
+而不是平铺的"事实笔记"（那曾经是云端 profile / 工作区 markdown 的分工）。
+⚠️ 现在 markdown 层已清空为指针不再承载事实 —— 事实只有本图库一处，
+所以**"没写进图库"就等于"没记住"**。
 
 ## 关键路径（可经环境变量覆盖）
 
@@ -124,7 +130,15 @@ $PY $RUN <subcommand>
 - 实体已存在于图中时用已有 `id`（先 `recall` 或 `status` 看不到全量时凭常识判断）。
 - 无值得记的内容 → `{"nodes":[],"edges":[]}`。
 
-## 与现有记忆的关系
+## 与 markdown 记忆的关系（2026-09-11 变更，旧的「并行补充」说法已作废）
 
-**并行补充，不替代**。长期事实仍走云端/工作区 markdown；关系网络、用户反馈、项目脉络走本图。
-两者不冲突，各管各的。
+**图库是唯一真源，md 只是指针。** 用户 2026-09-11 裁定后已执行：
+
+- 所有 md 记忆文件（`~/.workbuddy/MEMORY.md`、各工作区 `.workbuddy/memory/*.md`，共 71 个）
+  **内容全部清空，改写成「指向图库」的指针文件**；
+- 三个身份文件 `SOUL.md` / `USER.md` / `IDENTITY.md` **已删除**（它们本来也不进 agent 上下文）；
+- 全量备份：`/Users/sai/WorkBuddy/memory-backup-20260911-1707.tar.gz`（84 个文件）
+  与 `/Users/sai/WorkBuddy/identity+memory-backup-20260911-1710.tar.gz`（74 个文件）。回滚用 `tar -xzf <归档> -C /Users/sai`。
+
+所以本层不再是「第三层」而是**唯一层**：用户偏好、项目脉络、反馈 valence、关系网络全在这里。
+md 里那段指针只说明「去哪查」，本身不含任何事实。

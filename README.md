@@ -2,7 +2,11 @@
 
 WorkBuddy 接入 [lobster-memory](https://github.com/LittleLollipop/lobster-memory) 长期图记忆的桥接技能。
 
-作为 WorkBuddy 现有"云端 profile + 工作区 markdown"记忆**之外的并行补充层**，用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成（无平台 post-turn 钩子，靠惯例触发）。
+**2026-09-11 起本技能是 WorkBuddy 长期记忆的唯一真源** —— 当日 markdown 记忆层（云端 profile 依赖的
+`~/.workbuddy/MEMORY.md` 与各工作区 `.workbuddy/memory/*.md`）已**全部清空为指针**，身份文件
+（`SOUL.md` / `USER.md` / `IDENTITY.md`）已删除。此前它只是"并行补充层"，现在事实只剩图库一处。
+
+用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成（无平台 post-turn 钩子，靠惯例触发）。
 
 ## 文件
 
@@ -36,6 +40,13 @@ $PY $RUN consolidate --round N  # 约每 20 轮或容量告警时巩固
 ```
 
 ## 更新日志
+
+### v0.2.3 (2026-09-11)
+- **文档修正**：把「与 markdown 记忆并行补充」的表述改成「**唯一真源**」。
+  来源：用户 2026-09-11 裁定 markdown 记忆层清空为指针、身份文件删除后，
+  旧说法（SKILL.md 正文 / README 开头 / `_skillhub_meta.json` 三个 description）
+  全部失真 —— 一处改了一处没改，比不改更坏。
+- 无功能改动；`SKILL.md` / `_skillhub_meta.json` 版本号同步。
 
 ### v0.2.2 (2026-07-23)
 - 重新发布 v0.2.2：依赖 lobster-memory >=0.2.2，对齐 SkillHub 占用冲突后的新版本

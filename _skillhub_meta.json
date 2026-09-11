@@ -1,11 +1,11 @@
 {
   "name": "wb-lobster-memory",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "display_name": "龙虾长期图记忆（WorkBuddy 桥接）",
   "display_name_en": "Lobster Long-term Graph Memory (WorkBuddy Bridge)",
-  "description": "WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。作为云端/工作区 markdown 记忆之外的并行补充层，用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成。",
-  "description_zh": "WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。作为云端/工作区 markdown 记忆之外的并行补充层，用知识图谱（实体-关系-情绪 valence）记录用户偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。",
-  "description_en": "A WorkBuddy bridge skill for the lobster-memory long-term graph memory. A parallel complement to cloud/workspace markdown memory — it records user preferences, project context, and feedback as a knowledge graph (entity-relation-emotion valence), with on-demand recall and periodic consolidation/forgetting. Extraction JSON is produced by WorkBuddy itself acting as the LLM.",
+  "description": "WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。2026-09-11 起是 WorkBuddy 长期记忆的**唯一真源**（markdown 记忆层已清空为指针、身份文件已删除），用知识图谱（实体-关系-情绪 valence）记录用户的偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。抽取 JSON 由 WorkBuddy 自身兼任 LLM 生成。",
+  "description_zh": "WorkBuddy 接入 lobster-memory 长期图记忆的桥接技能。2026-09-11 起是 WorkBuddy 长期记忆的唯一真源（markdown 记忆层已清空为指针、身份文件已删除），用知识图谱（实体-关系-情绪 valence）记录用户偏好、项目脉络与反馈，支持按需回忆与定期巩固遗忘。",
+  "description_en": "A WorkBuddy bridge skill for the lobster-memory long-term graph memory. Since 2026-09-11 it is the **single source of truth** for WorkBuddy's long-term memory (the markdown memory layer was emptied into pointers and the identity files deleted) — it records user preferences, project context, and feedback as a knowledge graph (entity-relation-emotion valence), with on-demand recall and periodic consolidation/forgetting. Extraction JSON is produced by WorkBuddy itself acting as the LLM.",
   "visibility": "public",
   "author": "Sai",
   "license": "MIT",
@@ -16,5 +16,5 @@
   "repository": "https://github.com/LittleLollipop/wb-lobster-memory",
   "homepage": "",
   "created_at": "2026-07-10",
-  "updated_at": "2026-07-23"
+  "updated_at": "2026-09-11"
 }
