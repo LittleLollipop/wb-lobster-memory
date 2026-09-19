@@ -73,17 +73,33 @@ RUN=~/path/to/wb-lobster-memory/runner.py
 $PY $RUN <subcommand>
 ```
 
-## ⚠️ 环境：读写都**不需要**提权；判"写没进去"只能靠**回读**（2026-09-19 实测）
+## ⚠️ 环境：图库读写会弹窗 —— 根因是**路径没登记**，登记一次即可免弹窗
 
-用户当日指出「你一直在申请访问权限，别的会话窗口并不需要」之后实测：
-`graph_crud.py` 的读写（`bulk` / `append`）**都不需要** `dangerouslyDisableSandbox`。
+### 根因（2026-09-19 查清）
+工作区（cwd）之外的**任何写**都会触发授权弹窗，而图库「**只读也会写**」：
 
-    ① 不提权跑写操作
-    ② **新进程**回读（`get <id>` / `list --bare --id-only | wc -l`）
-    ③ 只有回读失败（且 `.axeb.tmp` 完整）才上提权，或 `cp <db>.tmp <db>`
+- `MemoryGraph.__init__` 用 `open(lock, "w")` 建 `<db>.lock`
+- `MemoryGraph.close()` → Rust 侧**原子保存**（写 `.tmp` + rename 覆盖 `<db>`）
 
-⚠️ 不算证据的两样：**CLI 打印的成功行**（曾整批打印成功而一条没落盘）、
-输出末尾的 `⚠️ Sandbox bypassed`（只说明开关带了，不说明放行了）。
+⇒ 每次**读**都产生两次工作区外的写。**不是"要不要提权"的问题** ——
+带 `dangerouslyDisableSandbox` 只是把弹窗换成一次点击，根因还在。
+
+### 正解：登记进 `~/.workbuddy/settings.json`
+```json
+"sandbox": { "extraAllowWrite": [ "~/.workbuddy/lobster-memory/" ] }
+```
+（本记忆库的标准位置已登记；项目图库见 `se-semantic-graph` 的同名小节。）
+⚠️ 改完要**重启 WorkBuddy** 才重读。
+
+### 判据（别看"有没有弹窗"，看输出）
+真实写 + **新进程回读**，命令里**不带** `dangerouslyDisableSandbox`：
+输出里既无 `SANDBOX EXECUTION REJECTED`、也无 `⚠️ Sandbox bypassed`，
+且 `close()` 不抛 `Io("Operation not permitted")` ⇒ 登记生效。
+⚠️ 只有「新进程回读」算真值：CLI 的成功行与 `⚠️ Sandbox bypassed` 那行都不算证据。
+
+### 过渡手段
+把库 `cp` 到**工作区内**再读（cp = 读工作区外 + 写工作区内，两侧都允许 ⇒ 零弹窗）。
+⚠️ 只是只读快照：写仍要弹，且每次得重 cp。
 
 ⚠️ 也不要在命令行里手写 bulk 的 JSON（`content` 内直引号会静默炸批）——
 用 `json.dump` 生成文件再 `bulk`。
