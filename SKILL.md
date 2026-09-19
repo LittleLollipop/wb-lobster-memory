@@ -73,33 +73,25 @@ RUN=~/path/to/wb-lobster-memory/runner.py
 $PY $RUN <subcommand>
 ```
 
-## ⚠️ 环境：图库读写会弹窗 —— 根因是**路径没登记**，登记一次即可免弹窗
+## 🔴 环境：库必须在**产品数据目录**（`~/.workbuddy/`）下 —— 这是不弹窗的唯一前提
 
-### 根因（2026-09-19 查清）
-工作区（cwd）之外的**任何写**都会触发授权弹窗，而图库「**只读也会写**」：
+本技能的默认位置 `~/.workbuddy/lobster-memory/`（`LOBSTER_MEMORY_DIR`）**本来就对，别改**。
+判据不是"要不要提权"，而是"**路径**"：
 
-- `MemoryGraph.__init__` 用 `open(lock, "w")` 建 `<db>.lock`
-- `MemoryGraph.close()` → Rust 侧**原子保存**（写 `.tmp` + rename 覆盖 `<db>`）
+- `~/.workbuddy/` 下的读写**默认放行**（实测：读写、回读全零弹窗）
+- 工作区之外的**其它**路径，任何写都要授权；而图库「**只读也会写**」——
+  `__init__` 用 `open(lock,"w")` 建 `<db>.lock`，`close()` 是**原子保存**
+  （写 `<db>.tmp` 再 rename 覆盖 `<db>`），而 **rename 覆盖在安全策略里被判成「删除」**。
+  ⇒ 库一旦放进项目目录，就是**每次操作弹一次窗**（实测同一个库文件被请求授权 **380 次**，
+  见 `~/.workbuddy/audit-log/*.jsonl` 的 `file-safety` 事件）。
 
-⇒ 每次**读**都产生两次工作区外的写。**不是"要不要提权"的问题** ——
-带 `dangerouslyDisableSandbox` 只是把弹窗换成一次点击，根因还在。
+⚠️ 别想着"手工改 `settings.json` 的 `sandbox.extraAllowWrite` 治好它"：那个数组由 Security Center
+在**启动时 reconcile** 写入，且产品数据目录本来就不需要它（项目图库同理，见 `se-semantic-graph`）。
 
-### 正解：登记进 `~/.workbuddy/settings.json`
-```json
-"sandbox": { "extraAllowWrite": [ "~/.workbuddy/lobster-memory/" ] }
-```
-（本记忆库的标准位置已登记；项目图库见 `se-semantic-graph` 的同名小节。）
-⚠️ 改完要**重启 WorkBuddy** 才重读。
-
-### 判据（别看"有没有弹窗"，看输出）
-真实写 + **新进程回读**，命令里**不带** `dangerouslyDisableSandbox`：
-输出里既无 `SANDBOX EXECUTION REJECTED`、也无 `⚠️ Sandbox bypassed`，
-且 `close()` 不抛 `Io("Operation not permitted")` ⇒ 登记生效。
-⚠️ 只有「新进程回读」算真值：CLI 的成功行与 `⚠️ Sandbox bypassed` 那行都不算证据。
-
-### 过渡手段
-把库 `cp` 到**工作区内**再读（cp = 读工作区外 + 写工作区内，两侧都允许 ⇒ 零弹窗）。
-⚠️ 只是只读快照：写仍要弹，且每次得重 cp。
+判据（**别看有没有弹窗，看输出**）：真实写 + **新进程回读**，命令里不带
+`dangerouslyDisableSandbox`，输出里既无 `SANDBOX EXECUTION REJECTED`、也无
+`⚠️ Sandbox bypassed`，且 `close()` 不抛 `Io("Operation not permitted")`。
+⚠️ 只有「新进程回读」算真值 —— CLI 打印的成功行与 `⚠️ Sandbox bypassed` 那行都不算证据。
 
 ⚠️ 也不要在命令行里手写 bulk 的 JSON（`content` 内直引号会静默炸批）——
 用 `json.dump` 生成文件再 `bulk`。
