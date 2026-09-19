@@ -73,6 +73,21 @@ RUN=~/path/to/wb-lobster-memory/runner.py
 $PY $RUN <subcommand>
 ```
 
+## ⚠️ 环境：读写都**不需要**提权；判"写没进去"只能靠**回读**（2026-09-19 实测）
+
+用户当日指出「你一直在申请访问权限，别的会话窗口并不需要」之后实测：
+`graph_crud.py` 的读写（`bulk` / `append`）**都不需要** `dangerouslyDisableSandbox`。
+
+    ① 不提权跑写操作
+    ② **新进程**回读（`get <id>` / `list --bare --id-only | wc -l`）
+    ③ 只有回读失败（且 `.axeb.tmp` 完整）才上提权，或 `cp <db>.tmp <db>`
+
+⚠️ 不算证据的两样：**CLI 打印的成功行**（曾整批打印成功而一条没落盘）、
+输出末尾的 `⚠️ Sandbox bypassed`（只说明开关带了，不说明放行了）。
+
+⚠️ 也不要在命令行里手写 bulk 的 JSON（`content` 内直引号会静默炸批）——
+用 `json.dump` 生成文件再 `bulk`。
+
 ## 子命令
 
 | 命令 | 作用 | 何时用 |
